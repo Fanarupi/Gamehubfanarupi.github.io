@@ -113,65 +113,95 @@ footer p{color:#3D2200;font-size:0.75rem;}
 </footer>
 
 <script>
-const PLAYERS=[
-  {name:'🦊 RenardRoi',   kills:1842,wins:234,gems:8120,deaths:180,char:'🦊',badge:'👑'},
-  {name:'🎯 VixarPro',    kills:1654,wins:198,gems:6540,deaths:220,char:'🎯',badge:'🥈'},
-  {name:'🐺 GrizzMaster', kills:1423,wins:178,gems:4210,deaths:195,char:'🐺',badge:'🥉'},
-  {name:'💨 SpeedFox',    kills:1208,wins:145,gems:5880,deaths:240,char:'🦊',badge:'⭐'},
-  {name:'🔥 FlameVix',    kills:1090,wins:132,gems:3980,deaths:278,char:'🎯',badge:'🔥'},
-  {name:'🌿 BushHunter',  kills:987, wins:118,gems:7120,deaths:310,char:'🦊',badge:'🌿'},
-  {name:'⚡ LightningFox',kills:856, wins:102,gems:2870,deaths:290,char:'🎯',badge:'⚡'},
-  {name:'🛡️ TankLord',   kills:780, wins:98, gems:1540,deaths:180,char:'🐺',badge:'🛡️'},
-  {name:'🌙 NightFox',    kills:698, wins:84, gems:3650,deaths:320,char:'🦊',badge:'🌙'},
-  {name:'💎 GemKing',     kills:612, wins:76, gems:9840,deaths:350,char:'🐺',badge:'💎'},
-  {name:'🎭 TricksterVix',kills:540, wins:65, gems:2230,deaths:380,char:'🎯',badge:'🎭'},
-  {name:'🌲 ForestGuard', kills:490, wins:58, gems:4120,deaths:400,char:'🦊',badge:'🌲'},
+// Joueurs de démonstration (visibles même sans compte)
+const DEMO_PLAYERS=[
+  {name:'🦊 RenardRoi',   kills:1842,wins:234,gems:8120,deaths:180,char:'roux', badge:'👑', isDemo:true},
+  {name:'🎯 VixarPro',    kills:1654,wins:198,gems:6540,deaths:220,char:'vixar',badge:'🥈', isDemo:true},
+  {name:'🐺 GrizzMaster', kills:1423,wins:178,gems:4210,deaths:195,char:'grizzard',badge:'🥉', isDemo:true},
+  {name:'💨 SpeedFox',    kills:1208,wins:145,gems:5880,deaths:240,char:'roux', badge:'⭐', isDemo:true},
+  {name:'🔥 FlameVix',    kills:1090,wins:132,gems:3980,deaths:278,char:'vixar',badge:'🔥', isDemo:true},
+  {name:'🌿 BushHunter',  kills:987, wins:118,gems:7120,deaths:310,char:'roux', badge:'🌿', isDemo:true},
 ];
 
-let curFilter='kills',searchQ='';
+const CHAR_ICONS = {roux:'🦊', vixar:'🎯', grizzard:'🐺'};
+let curFilter='kills', searchQ='';
+let ALL_PLAYERS = [];
+
+function buildPlayerList() {
+  ALL_PLAYERS = [...DEMO_PLAYERS];
+  // Ajouter les vrais joueurs depuis localStorage
+  if(typeof FA_AUTH !== 'undefined') {
+    const real = FA_AUTH.getAllPlayers().map(p => ({
+      name: p.name,
+      kills: p.kills||0,
+      wins: p.wins||0,
+      gems: p.gems||0,
+      deaths: p.deaths||0,
+      char: p.char||'roux',
+      badge: CHAR_ICONS[p.char]||'🦊',
+      isReal: true,
+    }));
+    ALL_PLAYERS = [...real, ...DEMO_PLAYERS];
+  }
+}
 
 function sorted(){
-  let d=[...PLAYERS];
+  buildPlayerList();
+  let d=[...ALL_PLAYERS];
   if(curFilter==='wins') d.sort((a,b)=>b.wins-a.wins||b.kills-a.kills);
   else if(curFilter==='gems') d.sort((a,b)=>b.gems-a.gems||b.kills-a.kills);
   else d.sort((a,b)=>b.kills-a.kills);
   if(searchQ) d=d.filter(p=>p.name.toLowerCase().includes(searchQ.toLowerCase()));
   return d;
 }
+
 function renderPodium(){
-  const top=PLAYERS.slice(0,3);
-  const order=[top[1],top[0],top[2]],ranks=[2,1,3];
+  buildPlayerList();
+  const sorted3=[...ALL_PLAYERS].sort((a,b)=>b.kills-a.kills).slice(0,3);
+  if(sorted3.length<3) return;
+  const order=[sorted3[1],sorted3[0],sorted3[2]], ranks=[2,1,3];
   document.getElementById('podium').innerHTML=order.map((p,i)=>`
     <div class="pod-slot p${ranks[i]}">
-      <div class="pod-char">${p.badge}</div>
+      <div class="pod-char">${p.isReal?'✅ '+CHAR_ICONS[p.char]:p.badge}</div>
       <div class="pod-name">${p.name}</div>
       <div class="pod-score">⚔️ ${p.kills} élims</div>
       <div class="pod-block">${ranks[i]}</div>
     </div>`).join('');
 }
+
 function renderTable(){
   const d=sorted();
-  document.getElementById('lb-body').innerHTML=d.map((p,i)=>{
-    const rk=PLAYERS.indexOf(p)+1;
+  const curUser = (typeof FA_AUTH !== 'undefined') ? FA_AUTH.currentUser() : null;
+  document.getElementById('lb-body').innerHTML=d.map((p,idx)=>{
+    const rk=idx+1;
     const kd=(p.kills/Math.max(1,p.deaths)).toFixed(2);
-    return `<tr>
+    const isMe = curUser && p.name === curUser.username;
+    const rowStyle = isMe ? 'background:rgba(255,107,26,0.1);border-left:3px solid #FF6B1A;' : '';
+    return `<tr style="${rowStyle}">
       <td class="rk ${rk===1?'r1':rk===2?'r2':rk===3?'r3':''}">${rk}</td>
-      <td><div class="nm"><span>${p.badge}</span>${p.name}</div></td>
+      <td><div class="nm">
+        <span>${p.isReal ? CHAR_ICONS[p.char]||'🦊' : p.badge}</span>
+        ${p.name}${isMe?' <span style="font-size:0.6rem;color:#FF6B1A;font-weight:900">◀ MOI</span>':''}
+        ${p.isReal?'<span style="font-size:0.55rem;color:#88FF88;margin-left:4px">✅</span>':''}
+      </div></td>
       <td class="sc">${p.kills.toLocaleString()}</td>
       <td class="sc">${p.wins}</td>
       <td style="color:#00DDFF;font-weight:700">${p.gems.toLocaleString()}</td>
       <td class="kd">${kd}</td>
-      <td class="br">${p.char}</td>
+      <td class="br">${CHAR_ICONS[p.char]||p.char}</td>
     </tr>`;
   }).join('');
 }
+
 function setFilter(f,btn){
   curFilter=f;
   document.querySelectorAll('.f-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');renderTable();
 }
 function doSearch(q){searchQ=q;renderTable();}
-renderPodium();renderTable();
+function onUserLogin(){ renderPodium(); renderTable(); }
+window.addEventListener('DOMContentLoaded',()=>{ renderPodium(); renderTable(); });
 </script>
+<script src="auth.js"></script>
 </body>
 </html>

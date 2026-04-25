@@ -450,6 +450,13 @@ function selectChar(c, btn) {
   document.getElementById('hud-icon').textContent = brl.icon;
   document.getElementById('hud-name').textContent = brl.name;
   document.getElementById('super-name').textContent = brl.superName+' — [E] ou clic droit';
+  if(typeof FA_AUTH !== 'undefined') FA_AUTH.saveLastChar(c);
+}
+function onUserLogin() {
+  if(typeof FA_AUTH === 'undefined') return;
+  const lastChar = FA_AUTH.getLastChar();
+  const btn = document.querySelector('.char-btn[data-char="'+lastChar+'"]');
+  if(btn) selectChar(lastChar, btn);
 }
 function selectMode(m, btn) {
   selectedMode = m;
@@ -810,6 +817,17 @@ function addKillFeed(msg){
 
 function endGame(won){
   gameState='over';
+  // Sauvegarde progression si connecté
+  if(typeof FA_AUTH !== 'undefined') {
+    FA_AUTH.saveStats({
+      kills: kills,
+      wins: won ? 1 : 0,
+      gems: player.gems,
+      deaths: player.alive ? 0 : 1,
+      shots: shots,
+      gamesPlayed: 1,
+    });
+  }
   const ovr=document.getElementById('ov-result');
   document.getElementById('result-title').textContent=won?'VICTOIRE !':'DÉFAITE...';
   document.getElementById('result-title').style.background=won?
@@ -822,6 +840,11 @@ function endGame(won){
   if(selectedMode==='bounty'){ scoreLabel='Étoiles gagnées'; scoreVal=kills; }
   document.getElementById('result-label').textContent=scoreLabel;
   document.getElementById('result-score').textContent=scoreVal;
+  // Badge connecté dans l'overlay résultat
+  const savedBadge = (typeof FA_AUTH !== 'undefined' && FA_AUTH.currentUser())
+    ? '<div style="font-size:0.7rem;color:#88FF88;font-weight:800;margin-top:6px">✅ Progression sauvegardée !</div>'
+    : '<div style="font-size:0.7rem;color:#5C3300;font-weight:800;margin-top:6px">💡 Connecte-toi pour sauvegarder</div>';
+  document.getElementById('result-score').insertAdjacentHTML('afterend', savedBadge);
   ovr.classList.remove('hidden');
 }
 
@@ -1046,9 +1069,19 @@ canvas.addEventListener('contextmenu',e=>{
   if(gameState==='playing') activateSuper(player);
 });
 
+
+// Restore last char if logged in
+window.addEventListener('DOMContentLoaded', () => {
+  if(typeof FA_AUTH !== 'undefined') {
+    const lastChar = FA_AUTH.getLastChar();
+    const btn = document.querySelector('.char-btn[data-char="'+lastChar+'"]');
+    if(btn) selectChar(lastChar, btn);
+  }
+});
 // ── INIT ────────────────────────────────────────────────
 resize();
 drawStatic();
 </script>
+<script src="auth.js"></script>
 </body>
 </html>
