@@ -392,32 +392,80 @@ canvas{display:block;border-radius:8px;
       <p><span>E / Clic droit</span> Super</p>
     </div>
 
-    <!-- START OVERLAY -->
-    <div class="overlay" id="ov-start">
-      <div style="font-size:4rem;animation:charFloat 2s ease-in-out infinite" id="ov-char-icon">🦊</div>
-      <div class="ov-title">FOX ARENA</div>
-      <p class="ov-sub">Choisis un mode et entre dans l'arène !</p>
-
-      <div class="mode-grid">
-        <div class="mode-card sel" data-mode="gemgrab" onclick="selectMode('gemgrab',this)">
-          <span class="mode-icon">💎</span>
-          <div class="mode-name">GEM GRAB</div>
-          <div class="mode-desc">Récupère 10 gemmes et tiens-les 10s</div>
+    <!-- START OVERLAY — BRAWL STARS STYLE -->
+    <div class="overlay" id="ov-start" style="padding:0;overflow:hidden;background:transparent;">
+      <div id="bs-bg"></div>
+      <div id="bs-menu">
+        <div id="bs-modes-row">
+          <div class="bs-mode-tab bs-mode-active" data-mode="gemgrab" onclick="bsSelectMode('gemgrab',this)">
+            <span class="bs-tab-icon">💎</span><span class="bs-tab-name">GEM GRAB</span>
+          </div>
+          <div class="bs-mode-tab" data-mode="showdown" onclick="bsSelectMode('showdown',this)">
+            <span class="bs-tab-icon">💀</span><span class="bs-tab-name">SHOWDOWN</span>
+          </div>
+          <div class="bs-mode-tab" data-mode="bounty" onclick="bsSelectMode('bounty',this)">
+            <span class="bs-tab-icon">⭐</span><span class="bs-tab-name">BOUNTY</span>
+          </div>
         </div>
-        <div class="mode-card" data-mode="showdown" onclick="selectMode('showdown',this)">
-          <span class="mode-icon">💀</span>
-          <div class="mode-name">SHOWDOWN</div>
-          <div class="mode-desc">Dernier survivant — élimine tout le monde</div>
+        <div id="bs-center">
+          <div id="bs-mode-panel">
+            <div id="bs-mode-banner">
+              <div id="bs-mode-bigicon">💎</div>
+              <div id="bs-mode-title">GEM GRAB</div>
+              <div id="bs-mode-subtitle">Récupère 10 gemmes · Tiens-les 10s · Victoire !</div>
+              <div id="bs-mode-rules">
+                <div class="bs-rule">💎 Ramasse les gemmes sur la carte</div>
+                <div class="bs-rule">🏃 Atteins 10 gemmes en premier</div>
+                <div class="bs-rule">⏱️ Survie 10 secondes pour gagner</div>
+                <div class="bs-rule">💀 Les gemmes tombent à ta mort !</div>
+              </div>
+            </div>
+          </div>
+          <div id="bs-char-card">
+            <div id="bs-char-canvas-wrap">
+              <canvas id="bs-char-canvas" width="160" height="200"></canvas>
+            </div>
+            <div id="bs-char-info">
+              <div id="bs-char-name">ROUX</div>
+              <div id="bs-char-role">⚡ Équilibré</div>
+              <div id="bs-char-super">🔥 Super : Rafale de feu</div>
+              <div id="bs-char-stats">
+                <div class="bs-stat"><span class="bs-stat-lbl">❤️ Vie</span><div class="bs-stat-bar"><div class="bs-stat-fill" id="bs-stat-hp" style="width:62%"></div></div></div>
+                <div class="bs-stat"><span class="bs-stat-lbl">💥 Dégâts</span><div class="bs-stat-bar"><div class="bs-stat-fill" id="bs-stat-dmg" style="width:50%"></div></div></div>
+                <div class="bs-stat"><span class="bs-stat-lbl">💨 Vitesse</span><div class="bs-stat-bar"><div class="bs-stat-fill" id="bs-stat-spd" style="width:72%"></div></div></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mode-card" data-mode="bounty" onclick="selectMode('bounty',this)">
-          <span class="mode-icon">⭐</span>
-          <div class="mode-name">BOUNTY</div>
-          <div class="mode-desc">Plus tu élimines, plus tu gagnes d'étoiles</div>
+        <div id="bs-bottom">
+          <div id="bs-brawlers-row">
+            <div class="bs-brawler-pick bs-brawler-selected" data-char="roux" onclick="bsSelectChar('roux',this)">
+              <canvas class="bs-pick-canvas" data-char="roux" width="64" height="64"></canvas>
+              <div class="bs-pick-name">ROUX</div>
+              <div class="bs-pick-rarity" style="color:#AAAAAA">COMMUN</div>
+            </div>
+            <div class="bs-brawler-pick" data-char="vixar" onclick="bsSelectChar('vixar',this)">
+              <canvas class="bs-pick-canvas" data-char="vixar" width="64" height="64"></canvas>
+              <div class="bs-pick-name">VIXAR</div>
+              <div class="bs-pick-rarity" style="color:#44AAFF">RARE</div>
+            </div>
+            <div class="bs-brawler-pick" data-char="grizzard" onclick="bsSelectChar('grizzard',this)">
+              <canvas class="bs-pick-canvas" data-char="grizzard" width="64" height="64"></canvas>
+              <div class="bs-pick-name">GRIZZARD</div>
+              <div class="bs-pick-rarity" style="color:#CC44FF">ÉPIQUE</div>
+            </div>
+          </div>
+          <button id="bs-play-btn" onclick="bsLaunch()">
+            <span>⚔️</span><span id="bs-play-label">ENTRER DANS L'ARÈNE</span>
+          </button>
+          <div class="hint-txt" id="hint-txt">ZQSD · Clic pour tirer · E pour Super</div>
         </div>
       </div>
-
-      <button class="big-btn" onclick="startGame()">⚔️ Entrer dans l'arène !</button>
-      <div class="hint-txt" id="hint-txt">ZQSD · Clic pour tirer · E pour Super</div>
+      <div id="bs-countdown" class="hidden">
+        <div id="bs-countdown-char"></div>
+        <div id="bs-countdown-num">3</div>
+        <div id="bs-countdown-mode"></div>
+      </div>
     </div>
 
     <!-- RESULT OVERLAY -->
@@ -466,6 +514,65 @@ canvas{display:block;border-radius:8px;
 
 <style>
 @keyframes charFloat{0%,100%{transform:translateY(0)rotate(-5deg)}50%{transform:translateY(-14px)rotate(5deg)}}
+</style>
+
+<style>
+/* ══════════════════════════════════════
+   BRAWL STARS MENU
+══════════════════════════════════════ */
+#bs-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 40%,#1a0d00 0%,#0a0500 60%,#000 100%);overflow:hidden;}
+#bs-bg::before{content:'';position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,180,50,0.55),transparent),radial-gradient(1px 1px at 78% 12%,rgba(255,107,26,0.4),transparent),radial-gradient(2px 2px at 55% 70%,rgba(255,215,0,0.35),transparent),radial-gradient(1px 1px at 92% 80%,rgba(255,140,0,0.45),transparent);background-size:320px 320px;animation:twinkle 6s ease-in-out infinite alternate;}
+#bs-menu{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;}
+#bs-modes-row{display:flex;gap:0;flex-shrink:0;border-bottom:3px solid rgba(255,107,26,0.4);background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);}
+.bs-mode-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px 8px;cursor:pointer;transition:all 0.25s;border-bottom:3px solid transparent;margin-bottom:-3px;position:relative;overflow:hidden;}
+.bs-mode-tab:hover{background:rgba(255,107,26,0.08);}
+.bs-mode-active{border-bottom-color:var(--or)!important;background:rgba(255,107,26,0.18)!important;}
+.bs-tab-icon{font-size:1.5rem;filter:drop-shadow(0 0 6px rgba(255,215,0,0.5));}
+.bs-tab-name{font-family:'Bebas Neue',sans-serif;font-size:0.68rem;color:var(--am);letter-spacing:1.5px;transition:color 0.2s;}
+.bs-mode-active .bs-tab-name{color:var(--gd);}
+#bs-center{flex:1;display:flex;gap:12px;padding:12px 14px;min-height:0;overflow:hidden;}
+#bs-mode-panel{flex:1.2;display:flex;flex-direction:column;min-width:0;}
+#bs-mode-banner{background:linear-gradient(135deg,rgba(30,15,0,0.92),rgba(10,5,0,0.97));border:1px solid rgba(255,107,26,0.35);border-radius:16px;padding:16px;height:100%;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 30px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,180,50,0.1);position:relative;overflow:hidden;}
+#bs-mode-bigicon{font-size:3rem;line-height:1;filter:drop-shadow(0 0 14px rgba(255,215,0,0.6));animation:charFloat 3s ease-in-out infinite;}
+#bs-mode-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--or);letter-spacing:3px;text-shadow:0 0 18px rgba(255,107,26,0.6);line-height:1;}
+#bs-mode-subtitle{font-size:0.7rem;font-weight:800;color:var(--am);line-height:1.5;}
+#bs-mode-rules{display:flex;flex-direction:column;gap:5px;margin-top:4px;}
+.bs-rule{font-size:0.68rem;font-weight:700;color:var(--tx);background:rgba(255,255,255,0.04);border-left:2px solid var(--or);padding:4px 8px;border-radius:0 6px 6px 0;}
+#bs-char-card{width:168px;flex-shrink:0;background:linear-gradient(160deg,rgba(30,15,0,0.92),rgba(5,2,0,0.97));border:1px solid rgba(255,179,71,0.3);border-radius:16px;padding:10px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 30px rgba(0,0,0,0.5);position:relative;overflow:hidden;}
+#bs-char-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--or),transparent);}
+#bs-char-canvas-wrap{background:radial-gradient(ellipse at 50% 80%,rgba(255,107,26,0.15) 0%,transparent 70%);border-radius:12px;width:100%;display:flex;justify-content:center;}
+#bs-char-canvas{display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.6));}
+#bs-char-info{width:100%;}
+#bs-char-name{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gd);letter-spacing:2px;text-align:center;text-shadow:0 0 10px rgba(255,215,0,0.4);}
+#bs-char-role{font-size:0.62rem;font-weight:900;color:var(--am);text-align:center;letter-spacing:1px;margin-bottom:4px;}
+#bs-char-super{font-size:0.6rem;font-weight:800;color:#CC88FF;text-align:center;margin-bottom:6px;background:rgba(170,0,255,0.12);border:1px solid rgba(170,0,255,0.25);border-radius:8px;padding:3px 6px;}
+.bs-stat{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.bs-stat-lbl{font-size:0.58rem;font-weight:800;color:var(--am);min-width:52px;}
+.bs-stat-bar{flex:1;height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;}
+.bs-stat-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--or),var(--gd));transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+#bs-bottom{flex-shrink:0;padding:10px 14px 12px;background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);border-top:1px solid rgba(255,107,26,0.2);display:flex;flex-direction:column;align-items:center;gap:8px;}
+#bs-brawlers-row{display:flex;gap:10px;justify-content:center;}
+.bs-brawler-pick{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:all 0.2s;background:rgba(20,9,0,0.7);border:2px solid rgba(61,34,0,0.8);border-radius:12px;padding:6px 10px;min-width:78px;position:relative;}
+.bs-brawler-pick:hover{border-color:var(--am);transform:translateY(-2px);}
+.bs-brawler-selected{border-color:var(--or)!important;background:rgba(255,107,26,0.15)!important;box-shadow:0 0 14px rgba(255,107,26,0.35);}
+.bs-brawler-selected::after{content:'▼';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);font-size:0.55rem;color:var(--or);}
+.bs-pick-canvas{display:block;}
+.bs-pick-name{font-family:'Bebas Neue',sans-serif;font-size:0.72rem;color:var(--gd);letter-spacing:1px;}
+.bs-pick-rarity{font-size:0.5rem;font-weight:900;letter-spacing:1px;}
+#bs-play-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#FF6B1A,#CC3300);border:2px solid rgba(255,179,71,0.5);border-radius:50px;color:white;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px;padding:13px 48px;cursor:pointer;box-shadow:0 0 28px rgba(255,107,26,0.55),0 6px 25px rgba(0,0,0,0.5);transition:all 0.18s;position:relative;overflow:hidden;}
+#bs-play-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.12) 0%,transparent 50%);pointer-events:none;}
+#bs-play-btn:hover{transform:scale(1.04) translateY(-2px);box-shadow:0 0 45px rgba(255,107,26,0.7),0 10px 35px rgba(0,0,0,0.5);}
+#bs-play-btn:active{transform:scale(0.97);}
+#bs-play-btn span:first-child{font-size:1.3rem;}
+#bs-countdown{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(ellipse at center,rgba(10,5,0,0.92),rgba(0,0,0,0.97));}
+#bs-countdown.hidden{display:none;}
+#bs-countdown-char{font-size:5rem;animation:charFloat 0.6s ease-in-out infinite;}
+#bs-countdown-num{font-family:'Bebas Neue',sans-serif;font-size:7rem;line-height:1;color:var(--or);text-shadow:0 0 40px rgba(255,107,26,0.8),0 0 80px rgba(255,107,26,0.4);animation:cdPulse 1s ease-in-out;}
+#bs-countdown-mode{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gd);letter-spacing:4px;text-shadow:0 0 15px rgba(255,215,0,0.5);}
+@keyframes cdPulse{0%{transform:scale(2);opacity:0;}30%{transform:scale(1.05);opacity:1;}80%{transform:scale(1);opacity:1;}100%{transform:scale(0.8);opacity:0;}}
+@keyframes bsSlideIn{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+#bs-mode-banner,#bs-char-card,#bs-brawlers-row,#bs-play-btn{animation:bsSlideIn 0.35s ease both;}
+#bs-mode-banner{animation-delay:0.05s;}#bs-char-card{animation-delay:0.1s;}#bs-brawlers-row{animation-delay:0.12s;}#bs-play-btn{animation-delay:0.18s;}
 </style>
 
 <script>
@@ -573,7 +680,8 @@ function selectChar(c, btn) {
   document.querySelectorAll('.char-btn').forEach(b=>b.classList.remove('selected'));
   if (btn) btn.classList.add('selected');
   const brl = BRAWLERS[c];
-  document.getElementById('ov-char-icon').textContent = brl.icon;
+  // ov-char-icon removed — BS menu handles this
+  bsCurrentChar = c;
   document.getElementById('hud-icon').textContent = brl.icon;
   document.getElementById('hud-name').textContent = brl.name;
   document.getElementById('super-name').textContent = brl.superName+' — [E] ou clic droit';
@@ -1640,6 +1748,170 @@ window.addEventListener('DOMContentLoaded', () => {
     if(btn && !btn.classList.contains('locked')) selectChar(charToLoad, btn);
   }
 });
+
+// ══════════════════════════════════════════════════════════
+//  BRAWL STARS MENU SYSTEM
+// ══════════════════════════════════════════════════════════
+
+const BS_CHAR_DATA = {
+  roux:     { name:'ROUX',     role:'⚡ Équilibré', superTxt:'🔥 Super : Rafale de feu',    hp:62, dmg:50, spd:72, icon:'🦊', color:'#FF6B1A' },
+  vixar:    { name:'VIXAR',    role:'🎯 Sniper',    superTxt:'⚡ Super : Tir fantôme ×3',   hp:38, dmg:90, spd:55, icon:'🎯', color:'#00BBFF' },
+  grizzard: { name:'GRIZZARD', role:'🛡️ Tank',       superTxt:'🛡️ Super : Rage + bouclier', hp:100,dmg:65, spd:40, icon:'🐺', color:'#AA4400' },
+};
+
+const BS_MODE_DATA = {
+  gemgrab:  { icon:'💎', title:'GEM GRAB',  subtitle:'Récupère 10 gemmes · Tiens-les 10s · Victoire !', rules:['💎 Ramasse les gemmes sur la carte','🏃 Atteins 10 gemmes en premier','⏱️ Survie 10 secondes pour gagner','💀 Les gemmes tombent à ta mort !'] },
+  showdown: { icon:'💀', title:'SHOWDOWN',  subtitle:'Dernier renard debout · Élimine tout le monde !', rules:['💀 4 bots ennemis dans l'arène','⚔️ Élimine tous les adversaires','🏆 Dernier survivant = victoire','🌿 Utilise les buissons pour te cacher'] },
+  bounty:   { icon:'⭐', title:'BOUNTY',    subtitle:'90 secondes · Fais le max d'éliminations !',      rules:['⭐ 3 étoiles minimum pour gagner','⚔️ +1 étoile par élimination','⏱️ Chrono de 90 secondes','🎯 La précision paye !'] },
+};
+
+let bsCurrentChar = 'roux';
+
+function bsSelectMode(mode, el) {
+  selectedMode = mode;
+  document.querySelectorAll('.bs-mode-tab').forEach(t => t.classList.remove('bs-mode-active'));
+  el.classList.add('bs-mode-active');
+  const d = BS_MODE_DATA[mode];
+  document.getElementById('bs-mode-bigicon').textContent = d.icon;
+  document.getElementById('bs-mode-title').textContent = d.title;
+  document.getElementById('bs-mode-subtitle').textContent = d.subtitle;
+  document.getElementById('bs-mode-rules').innerHTML = d.rules.map(r => `<div class="bs-rule">${r}</div>`).join('');
+  // animate icon
+  const ico = document.getElementById('bs-mode-bigicon');
+  ico.style.animation = 'none'; void ico.offsetWidth;
+  ico.style.animation = 'charFloat 3s ease-in-out infinite';
+}
+
+function bsSelectChar(char, el) {
+  bsCurrentChar = char;
+  selectedChar = char;
+  document.querySelectorAll('.bs-brawler-pick').forEach(b => b.classList.remove('bs-brawler-selected'));
+  el.classList.add('bs-brawler-selected');
+  const d = BS_CHAR_DATA[char];
+  document.getElementById('bs-char-name').textContent = d.name;
+  document.getElementById('bs-char-role').textContent = d.role;
+  document.getElementById('bs-char-super').textContent = d.superTxt;
+  document.getElementById('bs-stat-hp').style.width  = d.hp + '%';
+  document.getElementById('bs-stat-dmg').style.width = d.dmg + '%';
+  document.getElementById('bs-stat-spd').style.width = d.spd + '%';
+  // Redraw big canvas
+  setTimeout(() => bsDrawBigChar(char), 20);
+  // update auth
+  if (typeof FA_AUTH !== 'undefined') FA_AUTH.saveLastChar(char);
+  // sync with game char
+  const gameBtn = document.querySelector('.char-btn[data-char="'+char+'"]');
+  if (gameBtn) selectChar(char, gameBtn);
+}
+
+function bsDrawCharOnCanvas(ctx2d, char, w, h, scale) {
+  scale = scale || 1;
+  ctx2d.save();
+  ctx2d.clearRect(0, 0, w, h);
+  const R = Math.min(w, h) * 0.36 * scale;
+  ctx2d.translate(w/2, h * 0.52);
+  if (char === 'roux')     drawRoux(R, {isPlayer:false, shield:0});
+  else if (char === 'vixar')    drawVixar(R, {isPlayer:false, shield:0});
+  else if (char === 'grizzard') drawGrizzard(R, {isPlayer:false, shield:0});
+  ctx2d.restore();
+}
+
+function bsDrawBigChar(char) {
+  const c = document.getElementById('bs-char-canvas');
+  if (!c) return;
+  const cx = c.getContext('2d');
+  bsDrawCharOnCanvas(cx, char, c.width, c.height, 1.1);
+}
+
+function bsDrawAllPickCanvases() {
+  document.querySelectorAll('.bs-pick-canvas').forEach(c => {
+    const char = c.getAttribute('data-char');
+    const cx = c.getContext('2d');
+    bsDrawCharOnCanvas(cx, char, c.width, c.height, 0.88);
+  });
+}
+
+function bsLaunch() {
+  const btn = document.getElementById('bs-play-btn');
+  btn.style.transform = 'scale(0.94)';
+  setTimeout(() => { btn.style.transform = ''; }, 120);
+
+  // Sync char & mode to game
+  selectedChar = bsCurrentChar;
+  const modeLabels = { gemgrab:'💎 GEM GRAB', showdown:'💀 SHOWDOWN', bounty:'⭐ BOUNTY' };
+  const charIcons  = { roux:'🦊', vixar:'🎯', grizzard:'🐺' };
+
+  // Show countdown
+  const cd = document.getElementById('bs-countdown');
+  const cdNum  = document.getElementById('bs-countdown-num');
+  const cdChar = document.getElementById('bs-countdown-char');
+  const cdMode = document.getElementById('bs-countdown-mode');
+  cdChar.textContent = charIcons[bsCurrentChar] || '🦊';
+  cdMode.textContent = modeLabels[selectedMode];
+  cd.classList.remove('hidden');
+
+  let count = 3;
+  function tick() {
+    cdNum.textContent = count;
+    // Reset animation
+    cdNum.style.animation = 'none';
+    void cdNum.offsetWidth;
+    cdNum.style.animation = 'cdPulse 1s ease-in-out forwards';
+    count--;
+    if (count >= 0) {
+      setTimeout(tick, 900);
+    } else {
+      // GO
+      cdNum.textContent = 'GO!';
+      cdNum.style.animation = 'none';
+      void cdNum.offsetWidth;
+      cdNum.style.animation = 'cdPulse 0.6s ease-in-out forwards';
+      setTimeout(() => {
+        cd.classList.add('hidden');
+        document.getElementById('ov-start').classList.add('hidden');
+        startGame();
+      }, 600);
+    }
+  }
+  tick();
+}
+
+// Init BS menu on DOM ready
+window.addEventListener('DOMContentLoaded', () => {
+  // Small delay to ensure drawRoux etc are defined
+  setTimeout(() => {
+    bsDrawBigChar('roux');
+    bsDrawAllPickCanvases();
+    // Check unlocks to grey out locked chars
+    if (typeof FA_AUTH !== 'undefined') {
+      const unlocks = FA_AUTH.getUnlocks();
+      document.querySelectorAll('.bs-brawler-pick').forEach(el => {
+        const c = el.getAttribute('data-char');
+        if (!unlocks[c]) {
+          el.style.opacity = '0.45';
+          el.style.cursor = 'default';
+          el.setAttribute('onclick', `bsShowLocked('${c}')`);
+        }
+      });
+      // Auto-select last char
+      const last = FA_AUTH.getLastChar();
+      if (unlocks[last]) {
+        const pick = document.querySelector('.bs-brawler-pick[data-char="'+last+'"]');
+        if (pick) bsSelectChar(last, pick);
+      }
+    }
+  }, 80);
+});
+
+function bsShowLocked(char) {
+  const d = BS_CHAR_DATA[char];
+  const msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);border:1px solid #5C3300;border-radius:12px;padding:10px 20px;font-size:0.8rem;font-weight:800;color:#FFB347;z-index:9999;text-align:center;animation:kfIn 0.2s ease both;';
+  msg.innerHTML = '🔒 ' + d.name + ' est verrouillé !<br><span style="color:#5C3300;font-size:0.7rem">Ouvre des coffres pour le débloquer</span>';
+  document.body.appendChild(msg);
+  setTimeout(() => msg.remove(), 2500);
+}
+
+
 // ── INIT ────────────────────────────────────────────────
 resize();
 drawStatic();
