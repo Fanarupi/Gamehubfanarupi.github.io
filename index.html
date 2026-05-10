@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameHub — Mes Jeux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --card: #1a1a26;
+      --border: #2a2a3f;
+      --accent: #7c5cfc;
+      --accent2: #fc5c7c;
+      --accent3: #5cfca2;
+      --text: #e8e8f0;
+      --muted: #7070a0;
+      --glow: rgba(124, 92, 252, 0.3);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: .4;
+    }
+
+    /* ── GRADIENT BLOBS ── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 600px; height: 600px; background: rgba(124,92,252,.15); top: -200px; left: -200px; }
+    .blob-2 { width: 500px; height: 500px; background: rgba(252,92,124,.1); bottom: -150px; right: -150px; }
+    .blob-3 { width: 400px; height: 400px; background: rgba(92,252,162,.08); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+    /* ── LAYOUT ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      padding: 5rem 0 4rem;
+      text-align: center;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(124,92,252,.12);
+      border: 1px solid rgba(124,92,252,.3);
+      border-radius: 99px;
+      padding: .35rem 1rem;
+      font-size: .8rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      animation: fadeDown .6s ease both;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -.03em;
+      animation: fadeDown .7s .1s ease both;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin-top: 1.2rem;
+      color: var(--muted);
+      font-size: 1.1rem;
+      font-weight: 300;
+      animation: fadeDown .7s .2s ease both;
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      justify-content: center;
+      margin: 3rem 0 2.5rem;
+      animation: fadeDown .7s .3s ease both;
+    }
+
+    .filter-btn {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      padding: .45rem 1.1rem;
+      border-radius: 99px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem;
+      transition: all .2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124,92,252,.1);
+      box-shadow: 0 0 16px rgba(124,92,252,.2);
+    }
+
+    /* ── GRID ── */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding-bottom: 5rem;
+      animation: fadeUp .7s .4s ease both;
+    }
+
+    /* ── CARD ── */
+    .game-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1.2rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform .25s, border-color .25s, box-shadow .25s;
+      position: relative;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(124,92,252,.5);
+      box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(124,92,252,.15);
+    }
+
+    .game-card[data-hidden] {
+      display: none;
+    }
+
+    .card-thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .card-thumb canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .card-tag {
+      position: absolute;
+      top: .75rem;
+      right: .75rem;
+      background: rgba(10,10,15,.7);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: .25rem .75rem;
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+      color: var(--muted);
+    }
+
+    .card-body {
+      padding: 1.4rem 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.6;
+      flex: 1;
+      margin-bottom: 1.2rem;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1.2rem;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .dot { width: 3px; height: 3px; background: var(--border); border-radius: 50%; }
+
+    .card-actions {
+      display: flex;
+      gap: .75rem;
+    }
+
+    .btn-play {
+      flex: 1;
+      padding: .7rem;
+      border-radius: .7rem;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #5c3dfc);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .02em;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      transition: opacity .2s, transform .15s;
+    }
+
+    .btn-play:hover { opacity: .85; transform: scale(.98); }
+
+    .btn-src {
+      padding: .7rem 1rem;
+      border-radius: .7rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .85rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color .2s, border-color .2s;
+    }
+
+    .btn-src:hover { color: var(--text); border-color: var(--text); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      display: none;
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 4rem;
+      color: var(--muted);
+    }
+
+    .empty-state.show { display: block; }
+
+    /* ── ADD GAME CARD ── */
+    .add-card {
+      background: transparent;
+      border: 2px dashed var(--border);
+      border-radius: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .75rem;
+      min-height: 220px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: border-color .2s, color .2s;
+      text-decoration: none;
+    }
+
+    .add-card:hover { border-color: var(--accent); color: var(--accent); }
+
+    .add-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .games-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="container">
+
+  <header>
+    <div class="logo-badge">🎮 &nbsp; Mon Portail</div>
+    <h1>Game<span>Hub</span></h1>
+    <p class="subtitle">Tous mes jeux, au même endroit.</p>
+  </header>
+
+  <!-- FILTRES -->
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-filter="all">Tous</button>
+    <button class="filter-btn" data-filter="action">Action</button>
+    <button class="filter-btn" data-filter="puzzle">Puzzle</button>
+    <button class="filter-btn" data-filter="arcade">Arcade</button>
+    <button class="filter-btn" data-filter="rpg">RPG</button>
+  </div>
+
+  <!-- GRILLE -->
+  <div class="games-grid" id="grid">
+
+    <!-- CARTE EXEMPLE 1 -->
+    <article class="game-card" data-category="arcade">
+      <div class="card-thumb">
+        <canvas id="cv1" width="480" height="270"></canvas>
+        <span class="card-tag">Arcade</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">Snake Neon</h2>
+        <p class="card-desc">Le classique Snake revisité avec des effets néon et des power-ups explosifs.</p>
+        <div class="card-meta">
+          <span>Solo</span><span class="dot"></span>
+          <span>Navigateur</span><span class="dot"></span>
+          <span>2024</span>
+        </div>
+        <div class="card-actions">
+          <a href="snake/index.html" class="btn-play">▶ &nbsp;Jouer</a>
+          <a href="https://github.com/tonpseudo/snake-neon" target="_blank" class="btn-src" title="Code source">
+            <!-- github icon -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.4.6.1.82-.26.82-.58v-2c-3.34.73-4.04-1.6-4.04-1.6-.54-1.38-1.33-1.74-1.33-1.74-1.08-.74.08-.73.08-.73 1.2.08 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.48 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23A11.5 11.5 0 0 1 12 5.8c1.02.005 2.05.14 3.01.4 2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- CARTE EXEMPLE 2 -->
+    <article class="game-card" data-category="puzzle">
+      <div class="card-thumb">
+        <canvas id="cv2" width="480" height="270"></canvas>
+        <span class="card-tag">Puzzle</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">HexFlow</h2>
+        <p class="card-desc">Relie les hexagones de même couleur sans croiser les chemins. 60 niveaux progressifs.</p>
+        <div class="card-meta">
+          <span>Solo</span><span class="dot"></span>
+          <span>Navigateur</span><span class="dot"></span>
+          <span>2024</span>
+        </div>
+        <div class="card-actions">
+          <a href="hexflow/index.html" class="btn-play">▶ &nbsp;Jouer</a>
+          <a href="https://github.com/tonpseudo/hexflow" target="_blank" class="btn-src" title="Code source">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.4.6.1.82-.26.82-.58v-2c-3.34.73-4.04-1.6-4.04-1.6-.54-1.38-1.33-1.74-1.33-1.74-1.08-.74.08-.73.08-.73 1.2.08 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.48 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23A11.5 11.5 0 0 1 12 5.8c1.02.005 2.05.14 3.01.4 2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- CARTE EXEMPLE 3 -->
+    <article class="game-card" data-category="action">
+      <div class="card-thumb">
+        <canvas id="cv3" width="480" height="270"></canvas>
+        <span class="card-tag">Action</span>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">Void Runner</h2>
+        <p class="card-desc">Esquive les obstacles à grande vitesse dans un couloir infini et bats ton meilleur score.</p>
+        <div class="card-meta">
+          <span>Solo</span><span class="dot"></span>
+          <span>Navigateur</span><span class="dot"></span>
+          <span>2025</span>
+        </div>
+        <div class="card-actions">
+          <a href="void-runner/index.html" class="btn-play">▶ &nbsp;Jouer</a>
+          <a href="https://github.com/tonpseudo/void-runner" target="_blank" class="btn-src" title="Code source">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.4.6.1.82-.26.82-.58v-2c-3.34.73-4.04-1.6-4.04-1.6-.54-1.38-1.33-1.74-1.33-1.74-1.08-.74.08-.73.08-.73 1.2.08 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.48 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23A11.5 11.5 0 0 1 12 5.8c1.02.005 2.05.14 3.01.4 2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- AJOUTER UN JEU -->
+    <a href="#" class="add-card" onclick="alert('Duplique une carte dans le HTML et personnalise-la !'); return false;">
+      <div class="add-icon">+</div>
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">Ajouter un jeu</span>
+      <span style="font-size:.8rem;">Duplique une carte dans le HTML</span>
+    </a>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" id="emptyState">
+      <p style="font-size:2rem;margin-bottom:.5rem;">🎮</p>
+      <p>Aucun jeu dans cette catégorie.</p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    Fait avec ❤️ — <a href="https://github.com/tonpseudo" target="_blank">Mon GitHub</a>
+  </div>
+</footer>
+
+<script>
+  /* ── THUMBNAILS GÉNÉRATIFS ── */
+  function drawThumb1(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.fillStyle = '#0d0d18';
+    ctx.fillRect(0, 0, w, h);
+    // grid
+    ctx.strokeStyle = 'rgba(124,92,252,.15)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (let y = 0; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    // snake segments
+    const segs = [[5,3],[4,3],[3,3],[3,4],[3,5],[3,6],[4,6],[5,6],[6,6],[6,5],[6,4],[7,4],[8,4],[9,4]];
+    segs.forEach(([gx, gy], i) => {
+      const x = gx * 40 + 20, y = gy * 40 + 20;
+      const t = i / segs.length;
+      ctx.save();
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = `hsl(${260 + t*40},80%,65%)`;
+      ctx.fillStyle = `hsl(${260 + t*40},80%,65%)`;
+      ctx.beginPath();
+      ctx.roundRect(x - 14, y - 14, 28, 28, 6);
+      ctx.fill();
+      ctx.restore();
+    });
+    // food
+    ctx.save();
+    ctx.shadowBlur = 24;
+    ctx.shadowColor = '#fc5c7c';
+    ctx.fillStyle = '#fc5c7c';
+    ctx.beginPath();
+    ctx.arc(9 * 40 + 20, 6 * 40 + 20, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // score
+    ctx.fillStyle = 'rgba(255,255,255,.6)';
+    ctx.font = 'bold 14px DM Sans, sans-serif';
+    ctx.fillText('SCORE  1420', 16, 26);
+  }
+
+  function drawThumb2(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.fillStyle = '#0a1020';
+    ctx.fillRect(0, 0, w, h);
+    const colors = ['#7c5cfc','#fc5c7c','#5cfca2','#fcda5c','#5cccfc'];
+    const hexes = [
+      [120,80,0],[200,80,1],[280,80,2],[160,135,3],[240,135,4],
+      [120,190,1],[200,190,2],[280,190,0],[160,245,4],[240,245,3]
+    ];
+    function hex(x, y, r, c, filled) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI/180*(60*i - 30);
+        i === 0 ? ctx.moveTo(x+r*Math.cos(a), y+r*Math.sin(a)) : ctx.lineTo(x+r*Math.cos(a), y+r*Math.sin(a));
+      }
+      ctx.closePath();
+      if (filled) {
+        ctx.save();
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = colors[c];
+        ctx.fillStyle = colors[c] + '55';
+        ctx.fill();
+        ctx.strokeStyle = colors[c];
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        ctx.strokeStyle = 'rgba(255,255,255,.08)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+    hexes.forEach(([x, y, c]) => hex(x, y, 38, c, true));
+    // path between same-colored hexes
+    ctx.save();
+    ctx.strokeStyle = '#7c5cfc';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#7c5cfc';
+    ctx.beginPath();
+    ctx.moveTo(120, 80);
+    ctx.lineTo(280, 80);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawThumb3(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    // dark tunnel gradient
+    const g = ctx.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, '#030308');
+    g.addColorStop(.5, '#0d0520');
+    g.addColorStop(1, '#030308');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    // tunnel lines
+    const cx = w/2, cy = h/2;
+    const cols = ['rgba(124,92,252,', 'rgba(92,252,162,', 'rgba(252,92,124,'];
+    for (let i = 6; i >= 1; i--) {
+      const s = i * 30;
+      const c = cols[i % 3];
+      ctx.strokeStyle = c + (0.08 + (6-i)*0.04) + ')';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(cx - s*1.8, cy - s, s*3.6, s*2);
+    }
+    // player ship
+    ctx.save();
+    ctx.translate(cx, cy + 40);
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = '#7c5cfc';
+    ctx.fillStyle = '#a080ff';
+    ctx.beginPath();
+    ctx.moveTo(0, -20);
+    ctx.lineTo(18, 14);
+    ctx.lineTo(0, 6);
+    ctx.lineTo(-18, 14);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    // obstacles
+    [[cx-100, cy-20, '#fc5c7c'],[cx+80, cy+30, '#5cfca2']].forEach(([ox, oy, col]) => {
+      ctx.save();
+      ctx.shadowBlur = 20; ctx.shadowColor = col;
+      ctx.fillStyle = col + '99';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(ox - 20, oy - 25, 40, 50, 4);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    });
+    ctx.fillStyle = 'rgba(255,255,255,.6)';
+    ctx.font = 'bold 14px DM Sans, sans-serif';
+    ctx.fillText('DISTANCE  3.4 km', 16, 26);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    drawThumb1(document.getElementById('cv1'));
+    drawThumb2(document.getElementById('cv2'));
+    drawThumb3(document.getElementById('cv3'));
+  });
+
+  /* ── FILTRES ── */
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.game-card');
+  const emptyState = document.getElementById('emptyState');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      let visible = 0;
+      cards.forEach(card => {
+        const match = f === 'all' || card.dataset.category === f;
+        if (match) { card.removeAttribute('data-hidden'); visible++; }
+        else card.setAttribute('data-hidden', '');
+      });
+      emptyState.classList.toggle('show', visible === 0);
+    });
+  });
+</script>
+</body>
+</html>
