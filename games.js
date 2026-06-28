@@ -63,14 +63,136 @@ const GAMES = [
     tags: ["MOBA", "Compétitif", "Free-to-play", "Esport", "PC", "Stratégie"]
   },
   {
+{
     id: 7,
     name: "Valorant",
     icon: "🎯",
     genre: "FPS Tactique",
     year: 2020,
     dev: "Riot Games",
-    desc: "Un FPS tactique mêlant la précision de Counter-Strike aux capacités d'agents uniques. Plante ou désamorce la Spike, et communique avec ton équipe pour dominer.",
-    tags: ["FPS", "Tactique", "Compétitif", "Free-to-play", "Esport", "PC"]
+
+    desc: "Valorant est un FPS tactique où deux équipes de cinq joueurs s'affrontent. Chaque agent possède des capacités uniques qui viennent compléter le gunplay.",
+
+    tags: [
+        "FPS",
+        "Compétitif",
+        "Esport",
+        "Free-to-play",
+        "PC",
+        "Riot Games"
+    ],
+
+    guide: {
+
+        economy: [
+            ["Pistol (Attaque)", "Ghost ou Sheriff"],
+            ["Pistol (Défense)", "Ghost ou Frenzy"],
+            ["Victoire pistol", "Spectre + Bouclier léger"],
+            ["Défaite pistol", "Classic ou Sheriff"],
+            ["Bonus", "Garder Spectre"],
+            ["Full Buy", "Vandal + Armure lourde"],
+            ["Eco", "Sheriff / Marshal"],
+            ["Force Buy", "Bulldog / Guardian / Spectre"]
+        ],
+
+        weapons: [
+            {
+                name: "Vandal",
+                use: "Excellente sur les longues distances. One Tap dans la tête."
+            },
+            {
+                name: "Phantom",
+                use: "Parfaite pour les smokes et les combats rapprochés."
+            },
+            {
+                name: "Operator",
+                use: "Très forte pour tenir une ligne."
+            },
+            {
+                name: "Sheriff",
+                use: "La meilleure arme d'éco."
+            }
+        ],
+
+        maps: {
+
+            "Ascent": [
+                "Omen",
+                "Sova",
+                "Killjoy",
+                "Jett",
+                "KAY/O"
+            ],
+
+            "Bind": [
+                "Brimstone",
+                "Raze",
+                "Gekko",
+                "Cypher",
+                "Viper"
+            ],
+
+            "Haven": [
+                "Omen",
+                "Breach",
+                "Sova",
+                "Jett",
+                "Cypher"
+            ],
+
+            "Split": [
+                "Omen",
+                "Raze",
+                "Cypher",
+                "Sage",
+                "Breach"
+            ],
+
+            "Lotus": [
+                "Omen",
+                "Fade",
+                "Raze",
+                "Killjoy",
+                "Vyse"
+            ],
+
+            "Sunset": [
+                "Omen",
+                "Cypher",
+                "Breach",
+                "Neon",
+                "Sova"
+            ],
+
+            "Icebox": [
+                "Viper",
+                "Sova",
+                "Killjoy",
+                "Jett",
+                "Harbor"
+            ]
+        },
+
+        tips: [
+
+            "Ne recharge pas après chaque kill.",
+
+            "Joue toujours avec ton équipe.",
+
+            "Économise lorsque toute l'équipe économise.",
+
+            "Regarde régulièrement la minimap.",
+
+            "Utilise tes compétences avant de prendre un duel.",
+
+            "Ne gaspille pas toutes tes utilités dès le début du round.",
+
+            "Préfire les angles les plus joués.",
+
+            "Communique toutes les informations importantes."
+        ]
+    }
+},
   },
   {
     id: 8,
